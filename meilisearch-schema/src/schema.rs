@@ -205,7 +205,6 @@ impl Schema {
 
     pub fn set_indexed(&mut self, name: &str) -> SResult<(FieldId, IndexedPos)> {
         let id = self.fields_map.insert(name)?;
-        println!("setting {} indexed", name);
 
         self.indexed = self.indexed.take().map(|mut v| {
             v.insert(id);
