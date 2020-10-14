@@ -16,14 +16,6 @@ impl<T> OptionAll<T> {
         std::mem::replace(self, OptionAll::None)
     }
 
-    fn map<U, F: FnOnce(T) -> U>(self, f: F) -> OptionAll<U> {
-        match self {
-            OptionAll::Some(x) => OptionAll::Some(f(x)),
-            OptionAll::All => OptionAll::All,
-            OptionAll::None => OptionAll::None,
-        }
-    }
-
     pub fn is_all(&self) -> bool {
         match self {
             OptionAll::All => true,
@@ -206,10 +198,9 @@ impl Schema {
     pub fn set_indexed(&mut self, name: &str) -> SResult<(FieldId, IndexedPos)> {
         let id = self.fields_map.insert(name)?;
 
-        self.indexed = self.indexed.take().map(|mut v| {
+        if let OptionAll::Some(ref mut v) = self.indexed {
             v.insert(id);
-            v
-        });
+        }
 
         if let Some(indexed_pos) = self.indexed_map.get(&id) {
             return Ok((id, *indexed_pos))
