@@ -220,56 +220,6 @@ impl Schema {
         }
     }
 
-    /// remove field from displayed attributes. If diplayed attributes is OptionAll::All,
-    /// dipslayed attributes is turned into OptionAll::Some(v) where v is all displayed attributes
-    /// except name.
-    pub fn remove_displayed(&mut self, name: &str) {
-        if let Some(id) = self.fields_map.id(name) {
-            self.displayed = match self.displayed.take() {
-                OptionAll::Some(mut v) => {
-                    v.remove(&id);
-                    OptionAll::Some(v)
-                }
-                OptionAll::All => {
-                    let displayed = self.fields_map
-                        .iter()
-                        .filter_map(|(key, &value)| {
-                            if key != name {
-                                Some(value)
-                            } else {
-                                None
-                            }
-                        })
-                        .collect::<HashSet<_>>();
-                    OptionAll::Some(displayed)
-                }
-                OptionAll::None => OptionAll::None,
-            };
-        }
-    }
-
-    pub fn remove_indexed(&mut self, name: &str) {
-        if let Some(id) = self.fields_map.id(name) {
-            self.indexed_map.remove(&id);
-            self.indexed = match self.indexed.take() {
-                // valid because indexed is All and indexed() return the content of
-                // indexed_map that is already updated
-                OptionAll::All => {
-                    let indexed = self.indexed_map
-                        .iter()
-                        .filter_map(|(&i, _)| if i != id { Some(i) } else { None })
-                        .collect();
-                    OptionAll::Some(indexed)
-                },
-                OptionAll::Some(mut v) => {
-                    v.retain(|x| *x != id);
-                    OptionAll::Some(v)
-                }
-                OptionAll::None => OptionAll::None,
-            }
-        }
-    }
-
     pub fn is_ranked(&self, id: FieldId) -> bool {
         self.ranked.get(&id).is_some()
     }
